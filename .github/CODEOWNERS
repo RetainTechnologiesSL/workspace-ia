@@ -1,0 +1,3 @@
+# Aprobación obligatoria de PRs (Require review from Code Owners).
+# Gestionado por app:github-configure-branches (GITHUB_REQUIRED_APPROVER).
+* @fjparrenoa
