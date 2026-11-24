@@ -1,0 +1,41 @@
+# Solicita review al Owner (GITHUB_REQUIRED_APPROVER / CODEOWNERS) al abrir un PR.
+# La protección de rama ya exige aprobación de Code Owners; esto solo rellena "Reviewers".
+name: Auto request owner review
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  request-owner:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request review from required approver
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewer = 'fjparrenoa';
+            const author = context.payload.pull_request.user.login;
+            if (author.toLowerCase() === reviewer.toLowerCase()) {
+              core.info(`El autor del PR es @${reviewer}; GitHub no puede autoasignarle review a sí mismo.`);
+              return;
+            }
+            const { owner, repo } = context.repo;
+            const pull_number = context.payload.pull_request.number;
+            const existing = (context.payload.pull_request.requested_reviewers || [])
+              .map((u) => u.login.toLowerCase());
+            if (existing.includes(reviewer.toLowerCase())) {
+              core.info(`@${reviewer} ya está solicitado como reviewer.`);
+              return;
+            }
+            await github.rest.pulls.requestReviewers({
+              owner,
+              repo,
+              pull_number,
+              reviewers: [reviewer],
+            });
+            core.info(`Review solicitada a @${reviewer}.`);
