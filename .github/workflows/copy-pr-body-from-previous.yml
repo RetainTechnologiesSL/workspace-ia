@@ -1,0 +1,134 @@
+# Copia la descripción del PR previo del flujo Retain (test → preprod → master).
+#
+# - PR a preprod desde la misma rama de feature: usa el body del PR ya mergeado a test.
+# - PR test → preprod: concatena bodies de PRs mergeados a test desde el último merge a preprod.
+# - PR preprod → master: concatena bodies de PRs mergeados a preprod desde el último merge a master.
+#
+# Solo actualiza el body si está vacío o sigue siendo la plantilla en blanco.
+name: Copy PR body from previous stage
+
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  copy-body:
+    if: >
+      github.event.pull_request.draft == false &&
+      (github.event.pull_request.base.ref == 'preprod' || github.event.pull_request.base.ref == 'master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Autofill description from previous PR(s)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pr = context.payload.pull_request;
+            const base = pr.base.ref;
+            const head = pr.head.ref;
+            const pull_number = pr.number;
+            let body = pr.body || '';
+
+            const looksBlank = (text) => {
+              const t = (text || '').trim();
+              if (t === '') return true;
+              // Plantilla por defecto sin rellenar (tarea # y checklist vacíos).
+              const hasPlaceholderTask = /EasyRedmine \/ issue:\s*#\s*$/m.test(t) || /EasyRedmine \/ issue:\s*#\s*\n/.test(t);
+              const uncheckedOnly = (t.match(/- \[ \]/g) || []).length >= 3 && !(t.match(/- \[x\]/gi) || []).length;
+              const resumenEmpty = /## Resumen\s*\n+(<!--|$)/m.test(t) || /## Resumen\s*\n+## /m.test(t);
+              return hasPlaceholderTask || (uncheckedOnly && resumenEmpty);
+            };
+
+            async function listMerged(baseBranch, headBranch = null) {
+              const params = {
+                owner, repo,
+                state: 'closed',
+                base: baseBranch,
+                sort: 'updated',
+                direction: 'desc',
+                per_page: 30,
+              };
+              if (headBranch) {
+                params.head = `${owner}:${headBranch}`;
+              }
+              const { data } = await github.rest.pulls.list(params);
+              return data.filter((p) => p.merged_at);
+            }
+
+            async function lastMergedAt(baseBranch, headBranch) {
+              const merged = await listMerged(baseBranch, headBranch);
+              return merged[0]?.merged_at ? new Date(merged[0].merged_at) : null;
+            }
+
+            function formatCopied(sourcePrs) {
+              if (!sourcePrs.length) return null;
+              if (sourcePrs.length === 1) {
+                const p = sourcePrs[0];
+                const header = `<!-- Copiado automáticamente desde #${p.number} (${p.base.ref} ← ${p.head.ref}) -->\n\n`;
+                return header + (p.body || '').trim();
+              }
+              const parts = sourcePrs.map((p) => {
+                const title = `### #${p.number} — ${p.title}\n`;
+                const meta = `_Origen: ${p.html_url}_\n\n`;
+                return title + meta + ((p.body || '').trim() || '_(sin descripción)_');
+              });
+              const header = `<!-- Copiado automáticamente desde ${sourcePrs.length} PR(s) previos del flujo -->\n\n`;
+              return header + parts.join('\n\n---\n\n');
+            }
+
+            let sourcePrs = [];
+
+            if (base === 'preprod') {
+              if (head === 'test') {
+                const since = await lastMergedAt('preprod', 'test');
+                const mergedToTest = await listMerged('test');
+                sourcePrs = mergedToTest.filter((p) => !since || new Date(p.merged_at) > since);
+                // Orden cronológico
+                sourcePrs.sort((a, b) => new Date(a.merged_at) - new Date(b.merged_at));
+              } else {
+                const merged = await listMerged('test', head);
+                if (merged[0]) sourcePrs = [merged[0]];
+              }
+            } else if (base === 'master') {
+              if (head === 'preprod') {
+                const since = await lastMergedAt('master', 'preprod');
+                const mergedToPreprod = await listMerged('preprod');
+                sourcePrs = mergedToPreprod.filter((p) => !since || new Date(p.merged_at) > since);
+                sourcePrs.sort((a, b) => new Date(a.merged_at) - new Date(b.merged_at));
+              } else {
+                const fromPreprod = await listMerged('preprod', head);
+                if (fromPreprod[0]) {
+                  sourcePrs = [fromPreprod[0]];
+                } else {
+                  const fromTest = await listMerged('test', head);
+                  if (fromTest[0]) sourcePrs = [fromTest[0]];
+                }
+              }
+            }
+
+            if (!sourcePrs.length) {
+              core.info('No se encontró PR previo del que copiar la descripción.');
+              return;
+            }
+
+            if (!looksBlank(body)) {
+              core.info('El body del PR ya está relleno; no se sobrescribe.');
+              return;
+            }
+
+            const newBody = formatCopied(sourcePrs);
+            if (!newBody || !newBody.trim()) {
+              core.info('El/los PR origen no tenían descripción útil.');
+              return;
+            }
+
+            await github.rest.pulls.update({
+              owner, repo, pull_number,
+              body: newBody,
+            });
+            core.info(`Descripción actualizada desde: ${sourcePrs.map((p) => '#' + p.number).join(', ')}`);
