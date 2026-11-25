@@ -49,6 +49,12 @@ All these files reference the same core rules in `docs/base-standards.md`, ensur
 ✅ **Easy Updates**: Update rules once, all copilots benefit  
 ✅ **Portable**: Copy this structure to any project  
 
+## Retain fork: upstream sync
+
+This copy lives under **RetainTechnologiesSL/workspace-ia**. It tracks [LIDR-academy/lidr-specboot](https://github.com/LIDR-academy/lidr-specboot) on **`main`**, while **`master` / `test` / `preprod`** follow Retain’s release workflow.
+
+See [docs/fork-upstream-sync.md](docs/fork-upstream-sync.md) for fetch, merge, and PR steps into `master`.
+
 ## 🚀 Quick Start
 
 ### Recommended: Automated Setup
