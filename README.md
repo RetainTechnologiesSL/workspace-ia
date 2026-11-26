@@ -252,7 +252,7 @@ All development follows principles defined in `docs/base-standards.md`:
 2. **Test-Driven Development (TDD)**: Write failing tests first
 3. **Type Safety**: Fully typed code (TypeScript)
 4. **Clear Naming**: Descriptive variables and functions
-5. **English Only**: All code, comments, documentation, and messages in English
+5. **Specs/docs in Spanish, code in English**: OpenSpec artifacts and documentation in Spanish; code, comments and commit messages in English
 6. **90%+ Test Coverage**: Comprehensive testing across all layers
 7. **Incremental Changes**: Focused, reviewable modifications
 
@@ -328,7 +328,7 @@ Requirements:
 - Update backend, frontend, and documentation standards to reflect actual practices used by this team.
 - Update docs/api-spec.yml and docs/data-model.md so they match the real endpoints and entities of this project.
 - Ensure all references are internally consistent and aligned across docs/.
-- Keep everything in English and make guidance implementation-ready for AI agents.
+- Write specs/documentation in Spanish and keep code/comments in English; make guidance implementation-ready for AI agents.
 ```
 
 ### Maintaining Standards

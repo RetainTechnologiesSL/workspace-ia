@@ -14,14 +14,8 @@ alwaysApply: true
 - **Pattern Detection**: Detect and highlight repeated code patterns.
 
 ## 2. Language Standards
-- **English Only**: All technical artifacts must always use English, including:
-    - Code (variables, functions, classes, comments, error messages, log messages)
-    - Documentation (README, guides, API docs)
-    - Jira tickets (titles, descriptions, comments)
-    - Data schemas and database names
-    - Configuration files and scripts
-    - Git commit messages
-    - Test names and descriptions
+- **Specs and documentation in Spanish**: OpenSpec artifacts (proposal, design, tasks, delta specs) and project documentation (README, guides, API docs, Jira tickets) must be written in Spanish.
+- **Code and commits in English**: Code (variables, functions, classes, comments, error messages, log messages), data schemas/database names, configuration files/scripts, git commit messages and test names/descriptions stay in English, following standard industry convention.
 
 ## 3. Specific standards
 
@@ -69,4 +63,8 @@ Required order:
 4. Re-run verification against the updated artifacts before archiving.
 
 Do not apply direct code-only fixes in this window without updating OpenSpec artifacts.
+
+## 8. Git Commit Attribution
+
+Do **not** add `Co-Authored-By:` lines (e.g. `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`) to any git commit message. Omit all such attribution lines entirely.
 

@@ -1,0 +1,36 @@
+schema: spec-driven
+
+context: |
+  Technical context files (read before generating any artifact):
+  - docs/base-standards.md — single source of truth for project standards
+  - docs/backend-standards.md — API, database, testing, and backend conventions
+  - docs/frontend-standards.md — React components, UI/UX, and frontend architecture
+  - docs/documentation-standards.md — documentation structure and formatting
+  - docs/development_guide.md — project setup, environment, and workflows
+  - docs/api-spec.yml — API specification
+  - docs/data-model.md — domain model and data schema
+  - ai-specs/agents/backend-developer.md — backend implementation guidance
+  - ai-specs/agents/frontend-developer.md — frontend implementation guidance
+  - ai-specs/skills/ — reusable workflow guidance
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always state what is out of scope
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
