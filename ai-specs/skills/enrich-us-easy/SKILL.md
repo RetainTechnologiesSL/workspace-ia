@@ -57,7 +57,8 @@ Follow these steps:
    - `## Enhanced` (including `### E2E test cases (Playwright)` when step 7a applies)
    - **Required deliverable, not only a chat response:** write this `## Original` / `## Enhanced` output to `tmp/enriched-us/<change-name>.md` (or `tmp/enriched-us/easy-<issue_id>.md` in EasyRedmine mode, when no change name exists yet). Create the `tmp/enriched-us/` directory if it does not exist.
 9. EasyRedmine write-back is optional and only applies in EasyRedmine mode:
-   - Build the full enhanced description text, with clear `h2`/markup sections `[original]` and `[enhanced]` and readable formatting (lists/code snippets when useful), written to a temp file.
+   - **Write the description in HTML, not Textile.** This EasyRedmine instance stores/renders issue descriptions as raw HTML (confirmed: the fetched `description` field comes back as `<p>...</p>` tags, not Textile markup) — Textile (`h2.`, `*bold*`, `|_.` tables, etc.) is saved verbatim as plain text and shows up unformatted. Use real HTML tags: `<h2>[original]</h2>` / `<h2>[enhanced]</h2>`, `<h3>`, `<ul>/<li>`, `<ol>/<li>`, `<table>/<tr>/<td>`, `<strong>`, `<code>`.
+   - Build the full enhanced description text in HTML, with `<h2>[original]</h2>` and `<h2>[enhanced]</h2>` sections and readable formatting (lists/tables/code when useful), written to a temp file.
    - Update the issue's description with:
      ```
      ai-specs/skills/enrich-us-easy/scripts/easy-redmine.sh update-description <issue_id> <temp-file>
